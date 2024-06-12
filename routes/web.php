@@ -84,13 +84,17 @@ Route::middleware(['auth:owner'])->group(function () {
 });
 
 
+Route::get('/csrf-token', function() {
+    return response()->json(['token' => csrf_token()]);
+});
 
 //Route::get('/user/profile', [UserProfileController::class, 'show'])->name('user.profile');
 Route::middleware(['auth:owner'])->group(function () {
 Route::get('/owner/profile', [OwnerProfileController::class, 'show'])->name('owner.profile');
 Route::get('/owner/profile/edit', [OwnerProfileController::class, 'edit'])->name('owner.edit');
-Route::put('/owner/profile/{owner}/update', [OwnerProfileController::class, 'update'])->name('owner.update');
+Route::put('/owner/profile/{id}/update', [OwnerProfileController::class, 'update'])->name('owner.update');
 });
+
 //Route::get('/userprofile/edit',[UserProfileController::class, 'edit'])->name('profile.edit');
 //Route::put('/userprofile/{id}/update',[UserProfileController::class, 'update'])->name('profile.update');
 Route::middleware(['auth'])->group(function () {

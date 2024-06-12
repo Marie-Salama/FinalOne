@@ -130,6 +130,7 @@ class AuthenticatedSessionController extends Controller
                 'success' => true,
                 'message' => 'Success you are logged in as user',
                 'user' => $user,
+                'id' => $user->id,
                 'token'=>$token,
                 'userType' => 'user'
             ]);
@@ -145,6 +146,7 @@ class AuthenticatedSessionController extends Controller
                     'success' => true,
                     'message' => 'Success you are logged in as owner',
                     'user' => $owner,
+                    'id' => $owner->id,
                     'token'=>$token,
                     'userType' => 'owner' 
                 ]);

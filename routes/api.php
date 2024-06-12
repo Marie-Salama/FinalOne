@@ -84,7 +84,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/user/profile/{id}/update', [UserProfileController::class, 'update'])->name('update');
     Route::get('/owner/profile', [OwnerProfileController::class, 'show']);
     Route::get('/owner/profile/edit', [OwnerProfileController::class, 'edit']);
-    Route::put('/owner/profile/{owner}/update', [OwnerProfileController::class, 'update']);
+    Route::put('/owner/profile/{id}/update', [OwnerProfileController::class, 'update'])->name('owner.profile.update');
 });
 
 Route::get('/recommendation_system_output', [RecommendationController::class ,'recommendAreas'])->middleware('auth:sanctum');

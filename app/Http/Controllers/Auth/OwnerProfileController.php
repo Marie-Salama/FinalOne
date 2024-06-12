@@ -22,7 +22,11 @@ class OwnerProfileController extends Controller
 
         $photoUrl = $owner->photo;
         $ownerImage = $photoUrl ? asset('storage/' . $photoUrl) : null;
-        return view('auth.owner.profile', compact('owner','ownerImage'));
+        // return view('auth.owner.profile', compact('owner','ownerImage'));
+        return response()->json([
+            'owner' => $owner,
+            'photoUrl' => $ownerImage
+        ]);
     }
 
     public function edit()
@@ -183,7 +187,7 @@ class OwnerProfileController extends Controller
 //     }
 // }
 
-public function update(Request $request, Owner $owner)
+public function update(Request $request, $id)
 {
     try {
         // Add debug statement to see if the method is being called
@@ -205,7 +209,7 @@ public function update(Request $request, Owner $owner)
         //     'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         // ]);
 
-
+        $owner = Owner::findOrFail($id);
         // Add debug statement to see the request data
         logger()->info('Request data:', $request->all());
 

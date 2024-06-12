@@ -269,32 +269,73 @@ public function showAll()
 
 //     return view('auth.some-accommodations', compact('someAccommodations', 'images'));
 // }
+// public function showSome()
+// {
+//     // Retrieve 6 random accommodations
+//     $someAccommodations = Accommodation::inRandomOrder()->limit(6)->get();
+
+//     $images = [];
+//     foreach ($someAccommodations as $accommodation) {
+//         // Retrieve and decode images for each accommodation
+//         $accommodationImages = [];
+
+//         // Assuming images are stored as a JSON string in the database
+//         // Check if images attribute is not already an array
+//         $imageArray = is_string($accommodation->images) ? json_decode($accommodation->images, true) : $accommodation->images;
+
+//         // Check if $imageArray is an array
+//         if (is_array($imageArray)) {
+//             foreach ($imageArray as $image) {
+//                 $accommodationImages[] = asset('storage/' . $image); // Adjust the path accordingly
+//             }
+//         }
+
+//         $images[$accommodation->id] = $accommodationImages;
+//     }
+//     //return response()->json(['accommodations' =>   $someAccommodations ,  $images]);
+//    return view('auth.some-accommodations', compact('someAccommodations', 'images'));
+// }
+
+
+// Backend (AccommodationController.php)
 public function showSome()
 {
-    // Retrieve 6 random accommodations
     $someAccommodations = Accommodation::inRandomOrder()->limit(6)->get();
 
-    $images = [];
-    foreach ($someAccommodations as $accommodation) {
-        // Retrieve and decode images for each accommodation
-        $accommodationImages = [];
+    $accommodationsWithImages = $someAccommodations->map(function ($accommodation) {
+        $images = is_string($accommodation->images) ? json_decode($accommodation->images, true) : $accommodation->images;
 
-        // Assuming images are stored as a JSON string in the database
-        // Check if images attribute is not already an array
-        $imageArray = is_string($accommodation->images) ? json_decode($accommodation->images, true) : $accommodation->images;
-
-        // Check if $imageArray is an array
-        if (is_array($imageArray)) {
-            foreach ($imageArray as $image) {
-                $accommodationImages[] = asset('storage/' . $image); // Adjust the path accordingly
-            }
+        if (is_array($images)) {
+            $images = array_map(function ($image) {
+                return asset('storage/' . $image);
+            }, $images);
         }
 
-        $images[$accommodation->id] = $accommodationImages;
-    }
+        $accommodation->images = $images; // Replace the original images attribute with the updated array
 
-    return view('auth.some-accommodations', compact('someAccommodations', 'images'));
-}
+        return $accommodation;
+    });
+
+    return response()->json(['accommodations' => $accommodationsWithImages]);
+}// {
+//     $someAccommodations = Accommodation::inRandomOrder()->limit(6)->get();
+
+//     $accommodationsWithImages = $someAccommodations->map(function ($accommodation) {
+//         $images = is_string($accommodation->images) ? json_decode($accommodation->images, true) : $accommodation->images;
+
+//         if (is_array($images)) {
+//             $images = array_map(function ($image) {
+//                 return asset('storage/' . $image);
+//             }, $images);
+//         }
+
+//         $accommodation->images = $images; // Replace the original images attribute with the updated array
+
+//         return $accommodation;
+//     });
+
+//     return response()->json(['accommodations' => $accommodationsWithImages]);
+// }
 
 
 
@@ -331,7 +372,8 @@ public function index()
 
 
     // dd($images);
-    return view('auth.index', compact('accommodations', 'images'));
+    // return view('auth.index', compact('accommodations', 'images'));
+    return response()->json(['accommodations' => $accommodations, 'images' => $images]);
 }
 
 public function edit($id)
@@ -348,13 +390,48 @@ public function edit($id)
     return view('auth.edit', compact('accommodation'));
 }
 
+// public function update(Request $request, $id)
+// {
+//     $accommodation = Accommodation::findOrFail($id);
+
+//     // Check if the user is authorized to update this accommodation
+//     if ($accommodation->owner_id !== Auth::id()) {
+//         return response()->json(['error 403' => 'Unauthorized'], 401);
+//     }
+
+//     // Validate the request data
+//     $request->validate([
+//         'description' => 'required|string|max:255',
+//         'address' => 'required|string',
+//         'location_link' => 'required|url',
+//         'governorate' => 'required|string',
+//         'region' => 'required|string',
+//         'facilities' => 'required|string',
+//         'price' => 'required|numeric',
+//         'shared_or_individual' => 'required|string|in:shared,individual',
+//         // 'availability' => 'nullable|string',
+//         // 'images.*' => 'string',
+//         'images.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
+//           // Ensure file uploads are validated
+//         'main_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
+//     ]);
+    
+
+//     // Update the accommodation with the request data
+//     $accommodation->update($request->all());
+
+//     // return redirect()->route('accommodations.index')
+//     //                  ->with('success', 'Accommodation updated successfully');
+//     return response()->json(['success', 'Accommodation updated successfully'], 200);
+// }
+
 public function update(Request $request, $id)
 {
     $accommodation = Accommodation::findOrFail($id);
 
     // Check if the user is authorized to update this accommodation
     if ($accommodation->owner_id !== Auth::id()) {
-        return response()->json(['error 403' => 'Unauthorized'], 401);
+        return response()->json(['error' => 'Unauthorized'], 403);
     }
 
     // Validate the request data
@@ -367,19 +444,29 @@ public function update(Request $request, $id)
         'facilities' => 'required|string',
         'price' => 'required|numeric',
         'shared_or_individual' => 'required|string|in:shared,individual',
-        'availability' => 'nullable|string',
-        'images.*' => 'string',
-        // 'images.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',  // Ensure file uploads are validated
+        'images.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
+        'main_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
     ]);
-    
 
     // Update the accommodation with the request data
     $accommodation->update($request->all());
 
-    // return redirect()->route('accommodations.index')
-    //                  ->with('success', 'Accommodation updated successfully');
-    return response()->json(['success', 'Accommodation updated successfully'], 200);
+    // Handle images upload
+    if ($request->hasFile('images')) {
+        foreach ($request->file('images') as $image) {
+            $path = $image->store('images', 'public');
+            // Save each image path to your database if needed
+        }
+    }
+
+    if ($request->hasFile('main_image')) {
+        $mainImagePath = $request->file('main_image')->store('images', 'public');
+        // Save the main image path to your database if needed
+    }
+
+    return response()->json(['success' => 'Accommodation updated successfully'], 200);
 }
+
 
 public function destroy($id)
 {

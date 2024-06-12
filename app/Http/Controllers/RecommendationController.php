@@ -50,8 +50,11 @@ class RecommendationController extends Controller
                 return $accommodation->isAvailable();
             });
     
-        return view('recommendation_system_output', ['recommendations' => $recommendedAreas], ['accommodations' => $accommodations]);
-
+        // return view('recommendation_system_output', ['recommendations' => $recommendedAreas], ['accommodations' => $accommodations]);
+        return response()->json([
+            'recommendations' => $recommendedAreas,
+            'accommodations' => $accommodations,
+        ], 200);
         
     }
 

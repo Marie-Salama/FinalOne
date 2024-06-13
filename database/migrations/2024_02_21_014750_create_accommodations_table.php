@@ -26,6 +26,8 @@ return new class extends Migration
             $table->integer('no_of_tenants');//->nullable()->default(1);                              
             $table->integer('no_of_tenants_available')->nullable()->default(1);
             $table->string('images');
+            // $table->json('images'); // Change the column type to text
+
             $table->string('main_image')->nullable(false); // Explicitly specifying that it's not nullable
             $table->timestamps();
 

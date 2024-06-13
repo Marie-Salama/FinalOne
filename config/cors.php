@@ -43,7 +43,7 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie', 'owner/profile/*'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'owner/profile/*', 'storage/*'],
 
     'allowed_methods' => ['*'],
 

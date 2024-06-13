@@ -54,6 +54,8 @@ class Kernel extends HttpKernel
     protected $routeMiddleware = [
         // Other middleware entries...
         'auth.owner' => \App\Http\Middleware\AuthOwnerMiddleware::class,
+        'cors' => \App\Http\Middleware\CorsMiddleware::class,
+
     ];
 
     /**

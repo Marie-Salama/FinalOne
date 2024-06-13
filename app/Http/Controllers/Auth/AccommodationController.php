@@ -109,18 +109,11 @@ class AccommodationController extends Controller
 
 // }
 
-public function store(Request $request)
-
-{
-
+public function store(Request $request){
    if (!Auth::check()) {
     // Return a JSON response with 401 Unauthorized status
-    return response()->json(['error' => 'Unauthorized. You must be logged in as an owner to upload accommodation.'], 401);
-}
-   
+    return response()->json(['error' => 'Unauthorized. You must be logged in as an owner to upload accommodation.'], 401);}
     $user = Auth::user();
-    //dd($user);
-    // Check if the authenticated user exists and has an 'id' property
     if ($user && $user->id) {
     $validator = Validator::make($request->all(), [
         'description' => 'required|string|max:255',
@@ -131,17 +124,13 @@ public function store(Request $request)
         'facilities' => 'required|string',
         'price' => 'required|numeric',
         'shared_or_individual' => 'required|string|in:shared,individual',
-       'main_image'=>'required|image|mimes:jpeg,png,jpg,gif|max:20480',
+        'main_image'=>'required|image|mimes:jpeg,png,jpg,gif|max:20480',
         'images.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:20480',
         'no_of_tenants' => 'required|integer|min:1'
-
-    ]);
-
+]);
     if ($validator->fails()) {
-        // return redirect()->back()->withErrors($validator)->withInput();
         return response()->json(['error' => $validator->errors()], 422);
     }
-
     $mainImagePath = $request->file('main_image')->store('images', 'public');
 $uploadedImages = [];
 
@@ -149,35 +138,75 @@ $uploadedImages = [];
         foreach ($request->file('images') as $image) {
             $path = $image->store('images', 'public');
             $uploadedImages[] = $path;
-        }
-    }
-
+        }}
         $accommodationData = $validator->validated();
         $accommodationData['main_image'] = $mainImagePath;
         $accommodationData['images'] = $uploadedImages;
         $accommodationData['owner_id'] = Auth::user()->id;
         $accommodation = Accommodation::create($accommodationData);
-
-        // Set the initial number of tenants available based on the accommodation type
-        $noOfTenantsAvailable = $accommodation->shared_or_individual === 'shared' ? $accommodation->no_of_tenants : 1;
-        
-        // Update the accommodation with the initial number of tenants available
+        $noOfTenantsAvailable = $accommodation->shared_or_individual === 'shared' ? $accommodation->no_of_tenants : 1;  
         $accommodation->no_of_tenants_available = $noOfTenantsAvailable;
         $accommodation->save();
-
-
-    return response()->json([
+     return response()->json([
         'success' => true,
         'message' => 'Accommodation uploaded successfully',
     ]);
 }else {
-    // Handle the case where the authenticated user or 'id' property is missing
-    // return redirect()->route('login')->with('error', 'You must be logged in as an owner to upload accommodation.');
+
     return response()->json(['error' => 'You must be logged in to upload accommodation.'], 401);
 }
 
 
 }
+
+// public function store(Request $request){
+//     $validator = Validator::make($request->all(), [
+//         'description' => 'required|string|max:255',
+//         'address' => 'required|string',
+//         'location_link' => 'required|url',
+//         'governorate' => 'required|string',
+//         'region' => 'required|string',
+//         'facilities' => 'required|string',
+//         'price' => 'required|numeric',
+//         'shared_or_individual' => 'required|string|in:shared,individual',
+//         'main_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:20480',
+//         'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:20480',
+//         'no_of_tenants' => 'required|integer|min:1'
+//     ]);
+//     if ($validator->fails()) {
+//         return response()->json(['error' => $validator->errors()], 422);
+//     }
+//     $mainImage = $request->file('main_image');
+//     $mainImagePath = $mainImage->store('images', 'public');
+//     $uploadedImages = [];
+//     if ($request->hasFile('images')) {
+//         foreach ($request->file('images') as $image) {
+//             $path = $image->store('images', 'public');
+//             $uploadedImages[] = $path;   }}
+//     $accommodation = new Accommodation();
+//     $accommodation->description = $request->description;
+//     $accommodation->address = $request->address;
+//     $accommodation->location_link = $request->location_link;
+//     $accommodation->governorate = $request->governorate;
+//     $accommodation->region = $request->region;
+//     $accommodation->facilities = $request->facilities;
+//     $accommodation->price = $request->price;
+//     $accommodation->shared_or_individual = $request->shared_or_individual;
+//     $accommodation->main_image = $mainImagePath; // Store main image path
+//     $accommodation->images = json_encode($uploadedImages); // Store additional images paths as JSON
+//     $accommodation->owner_id = Auth::id();
+//     $accommodation->no_of_tenants = $request->no_of_tenants;
+//     $accommodation->no_of_tenants_available = $request->shared_or_individual === 'shared' ? $request->no_of_tenants : 1;
+    
+//     $accommodation->save();
+
+//     return response()->json([
+//         'success' => true,
+//         'message' => 'Accommodation uploaded successfully',
+//     ]);
+// }
+
+
 
 
 // public function show($accommodation_id)
@@ -341,6 +370,40 @@ public function showSome()
 
 // app/Http/Controllers/AccommodationController.php
 
+// public function index()
+// {
+//     if (!Auth::check()) {
+//         // Return a JSON response if not authenticated
+//         return response()->json(['error' => 'Unauthenticated'], 401);
+//     }
+
+//     $accommodations = Accommodation::where('owner_id', Auth::id())
+//         // ->select('id', 'description', 'address', 'location_link', 'governorate', 'region', 'price', 'availability', 'facilities', 'shared_or_individual', 'owner_id', 'images')
+//         ->get();
+
+//     // Populate $images array for each accommodation
+//     // $images = [];
+//     // foreach ($accommodations as $accommodation) {
+//     //     $images[$accommodation->id] = isset($accommodation->images[0])
+//     // ? asset('storage/images/' . basename($accommodation->images[0]))
+//     // : asset('images/no-image.png');
+//     // }
+
+//     $images = [];
+//     foreach ($accommodations as $accommodation) {
+//         $accommodationImages = [];
+//         foreach ($accommodation->images as $image) {
+//             $accommodationImages[] = asset('storage/images/' . basename($image));
+//         }
+//         $images[$accommodation->id] = $accommodationImages;
+        
+//     }
+
+
+//     // dd($images);
+//     // return view('auth.index', compact('accommodations', 'images'));
+//     return response()->json(['accommodations' => $accommodations, 'images' => $images]);
+// }
 public function index()
 {
     if (!Auth::check()) {
@@ -348,33 +411,33 @@ public function index()
         return response()->json(['error' => 'Unauthenticated'], 401);
     }
 
-    $accommodations = Accommodation::where('owner_id', Auth::id())
-        // ->select('id', 'description', 'address', 'location_link', 'governorate', 'region', 'price', 'availability', 'facilities', 'shared_or_individual', 'owner_id', 'images')
-        ->get();
-
-    // Populate $images array for each accommodation
-    // $images = [];
-    // foreach ($accommodations as $accommodation) {
-    //     $images[$accommodation->id] = isset($accommodation->images[0])
-    // ? asset('storage/images/' . basename($accommodation->images[0]))
-    // : asset('images/no-image.png');
-    // }
+    $accommodations = Accommodation::where('owner_id', Auth::id())->get();
 
     $images = [];
     foreach ($accommodations as $accommodation) {
+        // Initialize an array to store URLs of images for each accommodation
         $accommodationImages = [];
-        foreach ($accommodation->images as $image) {
-            $accommodationImages[] = asset('storage/images/' . basename($image));
+
+        // Check if the accommodation has any images
+        if ($accommodation->images && is_array($accommodation->images)) {
+            foreach ($accommodation->images as $image) {
+                // Assuming images are stored in 'public/storage/images'
+                $imageUrl = asset('storage/images/' . basename($image));
+                $accommodationImages[] = $imageUrl;
+            }
+        } else {
+            // If no images found for the accommodation, provide a default image URL
+            $accommodationImages[] = asset('images/no-image.png');
         }
+
+        // Assign the array of image URLs to the accommodation ID
         $images[$accommodation->id] = $accommodationImages;
-        
     }
 
-
-    // dd($images);
-    // return view('auth.index', compact('accommodations', 'images'));
+    // Return JSON response with accommodations and their respective image URLs
     return response()->json(['accommodations' => $accommodations, 'images' => $images]);
 }
+
 
 public function edit($id)
 {

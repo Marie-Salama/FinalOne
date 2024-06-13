@@ -11,6 +11,8 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\rentalController;
 use App\Http\Controllers\RecommendationController;
 use App\Http\Controllers\Auth\LogoutController;
+use App\Http\Controllers\filterController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -49,12 +51,12 @@ Route::middleware('guest')->group(function () {
 
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
-    
+
 });
 
 Route::middleware(['auth', 'auth:owner'])->group(function () {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
-    
+
 });
 
 
@@ -125,7 +127,10 @@ Route::get('/recommendation_system_output', [RecommendationController::class ,'r
 Route::get('/owneraccept', [rentalController::class, 'showRentals'])->name(name: 'owner');
 Route::put('rentals/{rental}/confirm', [rentalController::class, 'confirm'])->name('rental.confirm');
 
-
+//Marie added urls:
+Route::get('/filter', [FilterController::class, 'showFilterForm'])->name('filter.form');
+Route::get('/filtered-accommodations', [FilterController::class, 'filter'])->name('filter');
+//end of Marie urls
 
 
 

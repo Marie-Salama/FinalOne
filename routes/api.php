@@ -16,6 +16,8 @@ use App\Http\Controllers\RecommendationController;
 use App\Http\Middleware\ApiMiddleware;
 use App\Http\Middleware\CheckApiToken;
 use App\Http\Middleware\OwnerMiddleware;
+use App\Http\Controllers\filterController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -32,27 +34,27 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-   
 
-    Route::post('register', [RegisteredUserController::class, 'store']);
-    Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
-    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
+Route::post('register', [RegisteredUserController::class, 'store']);
+Route::post('login', [AuthenticatedSessionController::class, 'store']);
+
+Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
     // Route::post('/accommodation', [AccommodationController::class, 'store'])
     ->middleware('auth:sanctum');
 
 
 Route::post('/accommodationform', [AccommodationController::class, 'store'])
-->middleware('auth:sanctum');
+    ->middleware('auth:sanctum');
 
 
 Route::get('/accommodationform', [AccommodationController::class, 'create'])
-->middleware('auth:sanctum');
+    ->middleware('auth:sanctum');
 
-Route::get('/accommodationsofowner', [AccommodationController::class, 'index'])->middleware('auth:sanctum','auth.owner');
-Route::get('/accommodations/{id}/edit', [AccommodationController::class, 'edit'])->middleware('auth:sanctum','auth.owner');
-Route::put('/accommodations/{id}', [AccommodationController::class, 'update'])->middleware('auth:sanctum','auth.owner');
-Route::delete('accommodations/{id}',[AccommodationController::class, 'destroy'])->middleware('auth:sanctum','auth.owner');
+Route::get('/accommodationsofowner', [AccommodationController::class, 'index'])->middleware('auth:sanctum', 'auth.owner');
+Route::get('/accommodations/{id}/edit', [AccommodationController::class, 'edit'])->middleware('auth:sanctum', 'auth.owner');
+Route::put('/accommodations/{id}', [AccommodationController::class, 'update'])->middleware('auth:sanctum', 'auth.owner');
+Route::delete('accommodations/{id}', [AccommodationController::class, 'destroy'])->middleware('auth:sanctum', 'auth.owner');
 
 
 Route::get('/accommodation/prop', [AccommodationController::class, 'showAll']);
@@ -61,14 +63,14 @@ Route::get('/accommodation/some', [AccommodationController::class, 'showSome']);
 // Route::get('accommodation/{id}', [AccommodationController::class, 'show']);
 Route::get('accommodation/{accommodation_id}', [AccommodationController::class, 'show']);
 
-Route::get('/owner',function (Request $request){
+Route::get('/owner', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
 // Route::middleware(['auth:api'])->group(function () {
 //     Route::post('/accommodation', [AccommodationController::class, 'store']);
 
-    // Route::get('/owner/profile', [OwnerProfileController::class, 'show']);
+// Route::get('/owner/profile', [OwnerProfileController::class, 'show']);
 // });
 
 // Route::middleware([ApiMiddleware::class])->post('/accommodation', [AccommodationController::class, 'store']);
@@ -87,7 +89,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/owner/profile/{id}/update', [OwnerProfileController::class, 'update'])->name('owner.profile.update');
 });
 
-Route::get('/recommendation_system_output', [RecommendationController::class ,'recommendAreas'])->middleware('auth:sanctum');
+Route::get('/recommendation_system_output', [RecommendationController::class, 'recommendAreas'])->middleware('auth:sanctum');
 
 Route::get('/rental/{accommodation_id}', [RentalController::class, 'index'])->middleware('auth:sanctum');
 Route::post('/rental', [RentalController::class, 'store_rental'])->middleware('auth:sanctum');
@@ -95,3 +97,7 @@ Route::post('/rental', [RentalController::class, 'store_rental'])->middleware('a
 Route::get('/owneraccept', [rentalController::class, 'showRentals']);
 Route::put('rentals/{rental}/confirm', [rentalController::class, 'confirm']);
 
+//Marie added urls:
+Route::get('/filter', [FilterController::class, 'showFilterForm']);
+Route::get('/filtered-accommodations', [FilterController::class, 'filter']);
+//end of Marie urls

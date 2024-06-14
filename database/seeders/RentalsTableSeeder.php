@@ -41,7 +41,7 @@ class RentalsTableSeeder extends Seeder
     //         ]);
     //     }
     // }
-    public function run()
+    /*public function run()
     {
         $users = DB::table('users')->get();
         $accommodations = DB::table('accommodations')->get();
@@ -75,6 +75,38 @@ class RentalsTableSeeder extends Seeder
                         // 'updated_at' => Carbon::now(),
                     ]);
                 }
+            }
+        }
+    }*/
+    public function run()
+    {
+        $users = DB::table('users')->get();
+        $accommodations = DB::table('accommodations')->get();
+
+        for ($i = 0; $i < 40; $i++) {
+            $startDate = Carbon::now()->addDays(random_int(1, 30))->format('Y-m-d');
+            $endDate = Carbon::parse($startDate)->addMonths(random_int(1, 6))->format('Y-m-d');
+
+            $reci = 'https://templates.invoicehome.com/receipt-template-en-classic-white-750px.png';
+            $ref = 1234563212345;
+
+            $user = $users->random();
+            $matchingAccommodations = $accommodations->where('governorate', $user->where_to_go);
+
+            if ($matchingAccommodations->isNotEmpty()) {
+                $randomAccommodation = $matchingAccommodations->random();
+
+                DB::table('rentals')->insert([
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
+                    'user_id' => $user->id,
+                    'accommodations_id' => $randomAccommodation->id,
+                    'receipt' => $reci,
+                    'confirmed' => (bool) random_int(0, 1),
+                    'reference_number' => $ref,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now(),
+                ]);
             }
         }
     }

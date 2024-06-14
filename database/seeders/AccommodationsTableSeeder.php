@@ -13,6 +13,7 @@ class AccommodationsTableSeeder extends Seeder
      */
     public function run(): void
     {
+        $ownerIds = DB::table('owners')->pluck('id')->toArray();
         $governorates = [
             'Alexandria' => ['Seyouf', 'San Stefano', 'Louran', 'Sidi Bishr'],
             'Cairo' => ['Maadi', 'Heliopolis', 'Nasr City', '6th of October'],
@@ -22,6 +23,7 @@ class AccommodationsTableSeeder extends Seeder
         $numAccommodations = 0;
         // $ownerIds = DB::table('owners')->pluck('id')->toArray();
         while ($numAccommodations < 40) {
+            $ownerId = $ownerIds[array_rand($ownerIds)];
             $governorate = array_rand($governorates, 1);
             $region = $governorates[$governorate][array_rand($governorates[$governorate], 1)];
 
@@ -38,7 +40,8 @@ class AccommodationsTableSeeder extends Seeder
                 'price' => random_int(50, 200),
                 'facilities' => 'Facilities: WiFi, Kitchenette, Bathroom',
                 'shared_or_individual' => $sharedOrIndividual,
-                'owner_id' => random_int(1, 20), // Assuming you have owners with IDs 1 to 10
+                // 'owner_id' => random_int(1, 20), // Assuming you have owners with IDs 1 to 10
+                'owner_id' => $ownerId,
                 // 'owner_id' => $ownerId,
                 'no_of_tenants' => $numTenants,
                 'no_of_tenants_available' => $numTenants,
